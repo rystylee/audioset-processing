@@ -6,6 +6,7 @@
 import argparse
 import os
 import core.utils as utils
+from tqdm import tqdm
 
 
 def find(args):
@@ -35,7 +36,7 @@ def download(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', type=str, choices=['find', 'download'])
+    parser.add_argument('mode', type=str, choices=['find', 'download', 'download_all'])
     parser.add_argument('-c', '--classes', nargs='+', type=str,
                         help='list of classes to find in a given directory of audioset files')
     parser.add_argument('-b', '--blacklist', nargs='+', type=str,
@@ -55,7 +56,8 @@ if __name__ == '__main__':
 
     parser.set_defaults(
         label_file='./data/class_labels_indices.csv',
-        csv_dataset='./data/unbalanced_train_segments.csv',
+        # csv_dataset='./data/unbalanced_train_segments.csv',
+        csv_dataset='./data/balanced_train_segments.csv',
         destination_dir='./output',
         fs=16000
     )
@@ -72,4 +74,16 @@ if __name__ == '__main__':
             os.makedirs(args.destination_dir)
         download(args)
 
+    elif args.mode == 'download_all':
+        if args.destination_dir is not None and not os.path.isdir(args.destination_dir):
+            os.makedirs(args.destination_dir)
 
+        import csv
+        with open('./data/class_labels_indices.csv') as data:
+            reader = csv.reader(data, skipinitialspace=True)
+
+            class_names = [row[2] for row in reader]
+            print(f'# total number of class: {len(class_names)}')
+
+        for class_name in tqdm(class_names[:2]):
+            utils.download(class_name, args)

@@ -9,6 +9,8 @@
 import csv
 import os
 from shutil import copyfile
+import subprocess
+from tqdm import tqdm
 
 # defaults
 DEFAULT_LABEL_FILE = '../data/class_labels_indices.csv'
@@ -46,12 +48,16 @@ def download(class_name, args):
     with open(new_csv) as dataset:
         reader = csv.reader(dataset)
 
-        for row in reader:
-            # print command for debugging
-            print("ffmpeg -ss " + str(row[1]) + " -t 10 -i $(youtube-dl -f 'bestaudio' -g https://www.youtube.com/watch?v=" +
-                       str(row[0]) + ") -ar " + str(DEFAULT_FS) + " -- \"" + dst_dir + "/" + str(row[0]) + "_" + row[1] + ".wav\"")
-            os.system(("ffmpeg -ss " + str(row[1]) + " -t 10 -i $(youtube-dl -f 'bestaudio' -g https://www.youtube.com/watch?v=" +
-                       str(row[0]) + ") -ar " + str(DEFAULT_FS) + " -- \"" + dst_dir + "/" + str(row[0]) + "_" + row[1] + ".wav\""))
+        for row in tqdm(reader):
+            youtube_id = str(row[0])
+            start_second = str(row[1])
+
+            youtube_dl_command = f'youtube-dl -f "best[filesize<60M]" -g https://www.youtube.com/watch?v={youtube_id})'
+            video_url = subprocess.run(youtube_dl_command, capture_output=True, text=True).stdout
+
+            if video_url != '':
+                ffmpeg_command = f'ffmpeg -ss {start_second} -t 10 -i {video_url} {dst_dir}/{youtube_id}_{start_second}.mp4'
+                subprocess.run(ffmpeg_command, capture_output=True)
 
 
 def create_csv(class_name, args):
