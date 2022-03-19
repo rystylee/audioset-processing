@@ -58,6 +58,7 @@ def download(class_name, args):
             if video_url != '':
                 ffmpeg_command = f'ffmpeg -ss {start_second} -t 10 -i {video_url} {dst_dir}/{youtube_id}_{start_second}.mp4'
                 subprocess.run(ffmpeg_command, capture_output=True)
+                # subprocess.run(ffmpeg_command)
 
 
 def create_csv(class_name, args):
@@ -95,6 +96,9 @@ def create_csv(class_name, args):
         #  Include the row if it contains label for desired class and no labels of blacklisted classes
         to_write = [row for row in reader for label in label_id if label in row[3]
                     and bool(set(row[3].split(",")).intersection(blacklisted_ids)) is False]  # added check for blacklisted classes
+        # Delete duplicate
+        to_write = list(map(tuple, to_write))
+        to_write = list(set(to_write))
         writer.writerows(to_write)
 
     print("Finished writing CSV file for " + class_name)

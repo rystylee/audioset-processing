@@ -4,3 +4,4 @@ output/
 *.csv#
 
 venv/
+balanced_train_segments/

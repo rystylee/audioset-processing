@@ -5,8 +5,9 @@
 
 import argparse
 import os
+from unicodedata import decomposition
 import core.utils as utils
-from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
 
 def find(args):
@@ -56,9 +57,8 @@ if __name__ == '__main__':
 
     parser.set_defaults(
         label_file='./data/class_labels_indices.csv',
-        # csv_dataset='./data/unbalanced_train_segments.csv',
         csv_dataset='./data/balanced_train_segments.csv',
-        destination_dir='./output',
+        destination_dir='./balanced_train_segments',
         fs=16000
     )
 
@@ -85,5 +85,6 @@ if __name__ == '__main__':
             class_names = [row[2] for row in reader]
             print(f'# total number of class: {len(class_names)}')
 
-        for class_name in tqdm(class_names[:2]):
-            utils.download(class_name, args)
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            for class_name in class_names:
+                executor.submit(utils.download, class_name, args)
