@@ -37,7 +37,8 @@ def download(class_name, args):
     new_csv = create_csv(class_name, args)
     # construct path to destination dir
     dst_dir_root = args.destination_dir if args.destination_dir is not None else DEFAULT_DEST_DIR
-    dst_dir = os.path.join(dst_dir_root, class_name)  # Create directory to store found files
+    # dst_dir = os.path.join(dst_dir_root, class_name)  # Create directory to store found files
+    dst_dir = os.path.join(dst_dir_root, class_name.replace(' ', '_'))  # Create directory to store found files
 
     print("dst_dir: " + dst_dir)
 
